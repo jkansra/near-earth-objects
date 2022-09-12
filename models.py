@@ -37,12 +37,12 @@ class NearEarthObject:
 
         :param info: A dictionary of excess keyword arguments supplied to the constructor.
         """
-        self.designation = info.get("designation")
-        self.name = info.get("name")
-        self.diameter = info.get("diameter")
+        self.designation = info["designation"]
+        self.name = info["name"]
+        self.diameter = info["diameter"]
         if not self.diameter:
-            self.diameter = float("nan")
-        self.hazardous = info.get("hazardous")
+            self.diameter = float('nan')
+        self.hazardous = info["hazardous"]
 
         # Create an empty initial collection of linked approaches.
         self.approaches = []
@@ -99,17 +99,18 @@ class CloseApproach:
         
         :param info: A dictionary of excess keyword arguments supplied to the constructor.
         """
-        self._designation = info.get("designation")
-        self.time = info.get("time")
+        self._designation = info["designation"]
+        self.time = info["time"]
         if self.time:
             self.time = cd_to_datetime(self.time)
-            assert isinstance(self.time, datetime.datetime), "Date must be a datetime object"
-        self.distance = info.get("distance", float("nan"))
-        self.velocity = info.get("velocity", float("nan"))
+        self.distance = info["distance"]
+        if not self.distance:
+            self.distance = float('nan')
         
-        assert isinstance(self.distance, float), "Distance must be a float object"
-        assert isinstance(self.velocity, float), "Velocity must be a float object"
-
+        self.velocity = info["velocity"]
+        if not self.velocity:
+            self.velocity = float('nan')
+        
         # Create an attribute for the referenced NEO, originally None.
         self.neo = info.get("neo")
         

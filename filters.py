@@ -15,6 +15,7 @@ iterator.
 You'll edit this file in Tasks 3a and 3c.
 """
 import operator
+import itertools
 
 
 class UnsupportedCriterionError(NotImplementedError):
@@ -69,79 +70,44 @@ class AttributeFilter:
         """Repr method used to compare filter attribute."""
         return f"{self.__class__.__name__}(op=operator.{self.op.__name__}, value={self.value})"
    
-class DateFilter(AttributeFilter):
-    """Subclass of AttributeFilter to filter CloseApproach objects by date."""
+class DateTimeFilter(AttributeFilter):
+    """This class takes in attribute filter for DateTime queries."""
 
     @classmethod
     def get(cls, approach):
-        """Return approach.time converted to datetime.datetime object for the date filter.
-        
-        Args:
-            approach (CloseApproach): A CloseApproach object.
-        Returns:
-            [datetime.datetime]: Converted time to datetime object.
-            
-        """
+        """Take approach as the parameter and according to the operation(eq, le or ge) returns date."""
         return approach.time.date()
 
 class DistanceFilter(AttributeFilter):
-    """Subclass of AttributeFilter to filter approach objects by distance."""
+    """This class takes in attribute filter for Distance queries."""
 
     @classmethod
     def get(cls, approach):
-        """Return distance of the CloseApproach objectfor the distance filter.
-        
-        Args:
-            approach (CloseApproach): A CloseApproach object.
-        Returns:
-            [float]: Returns the distance of a CloseApproach.
-            
-        """
+        """Take approach as the parameter and according to the operation(eq, le or ge) returns Distance."""
         return approach.distance
     
-class VelocityFilter(AttributeFilter):
-    """Subclass of AttributeFilter to filter approach objects by velocity."""
+class VelFilter(AttributeFilter):
+    """This class takes in attribute filter for Velocity queries."""
 
     @classmethod
     def get(cls, approach):
-        """Return approach.velocity for the velocity filter.
-        
-        Args:
-            approach (CloseApproach): A CloseApproach object.
-        Returns:
-            [float]: Returns the velocity of a CloseApproach.
-            
-        """
+        """Take approach as the parameter and according to the operation(eq, le or ge) returns Velocity."""
         return approach.velocity
     
-class DiameterFilter(AttributeFilter):
-    """Subclass of AttributeFilter to filter approach objects by diameter."""
+class DiaFilter(AttributeFilter):
+    """This class takes in attribute filter for Diameter queries."""
 
     @classmethod
     def get(cls, approach):
-        """Return the diameter of the neo assigned to the CloseApproach object for the diameter filter.
-        
-        Args:
-            approach (CloseApproach): A CloseApproach object.
-        Returns:
-            [float]: Returns the diameter of a NearEarthObject object.
-            
-        """
+        """Take approach as the parameter and according to the operation(eq, le or ge) returns Diameter."""
         return approach.neo.diameter
 
-class HazardousFilter(AttributeFilter):
-    """Subclass to filter CloseApproach objects by if it's hazardous."""
+class PhaFilter(AttributeFilter):
+    """This class takes in attribute filter for Hazardous queries."""
 
     @classmethod
     def get(cls, approach):
-        """Return the hazardous attribute of the neo assigned to the CloseApproach object for the diameter filter.
-        
-        Args:
-            approach (CloseApproach): A CloseApproach object.
-        Returns:
-            [float]: Returns the hazardous attribute of a NearEarthObject object.
-            
-        """
+        """Take approach as the parameter and according to the operation(eq, le or ge) returns Hazardous."""
         return approach.neo.hazardous
 
 def create_filters(date=None, start_date=None, end_date=None,
@@ -180,25 +146,25 @@ def create_filters(date=None, start_date=None, end_date=None,
     filters = []
     
     if date:
-        filters.append(DateFilter(operator.eq, date))
+        filters.append(DateTimeFilter(operator.eq, date))
     if start_date:
-        filters.append(DateFilter(operator.ge, start_date))
+        filters.append(DateTimeFilter(operator.ge, start_date))
     if end_date:
-        filters.append(DateFilter(operator.le, end_date))
+        filters.append(DateTimeFilter(operator.le, end_date))
     if distance_min:
         filters.append(DistanceFilter(operator.ge, distance_min))
     if distance_max:
         filters.append(DistanceFilter(operator.le, distance_max))
     if velocity_min:
-        filters.append(VelocityFilter(operator.ge, velocity_min))
+        filters.append(VelFilter(operator.ge, velocity_min))
     if velocity_max:
-        filters.append(VelocityFilter(operator.le, velocity_max))
+        filters.append(VelFilter(operator.le, velocity_max))
     if diameter_min:
-        filters.append(DiameterFilter(operator.ge, diameter_min))
+        filters.append(DiaFilter(operator.ge, diameter_min))
     if diameter_max:
-        filters.append(DiameterFilter(operator.le, diameter_max))
+        filters.append(DiaFilter(operator.le, diameter_max))
     if hazardous is not None:
-        filters.append(HazardousFilter(operator.eq, hazardous))
+        filters.append(PhaFilter(operator.eq, hazardous))
 
     return filters
 
@@ -213,4 +179,4 @@ def limit(iterator, n=None):
     """
     if n == 0 or n is None:
         return iterator
-    return [x for i, x in enumerate(iterator) if i<n]
+    return itertools.islice(iterator, n)

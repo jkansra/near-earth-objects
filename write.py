@@ -28,11 +28,10 @@ def write_to_csv(results, filename):
         writer = csv.DictWriter(outfile, fieldnames=fieldnames)
         writer.writeheader()
         for result in results:
-            content = {**result.serialize(), **result.neo.serialize()}
-            content["name"] = content["name"] if content["name"] is not None else ""
-            content["potentially_hazardous"] = "True" if content["potentially_hazardous"] else "False"
-            writer.writerow(content)
-
+            content = {**result.serialize()}
+            contentNeo = {**result.neo.serialize()}
+            contentNeo.update(content)
+            writer.writerow(contentNeo)
 
 def write_to_json(results, filename):
     """Write an iterable of `CloseApproach` objects to a JSON file.
@@ -47,22 +46,22 @@ def write_to_json(results, filename):
     """
     data = []
     for result in results:
-        content = {**result.serialize(), **result.neo.serialize()}
-        content["name"] = content["name"] if content["name"] is not None else ""
-        content["potentially_hazardous"] = bool(1) if content["potentially_hazardous"] else bool(0)
+        content = {**result.serialize()}
+        contentNeo = {**result.neo.serialize()}
+        contentNeo.update(content)
         data.append(
             {
-                "datetime_utc": content["datetime_utc"],
-                "distance_au": content["distance_au"],
-                "velocity_km_s": content["velocity_km_s"],
+                "datetime_utc": contentNeo["datetime_utc"],
+                "distance_au": contentNeo["distance_au"],
+                "velocity_km_s": contentNeo["velocity_km_s"],
                 "neo": {
-                    "designation": content["designation"],
-                    "name": content["name"],
-                    "diameter_km": content["diameter_km"],
-                    "potentially_hazardous": content["potentially_hazardous"],
+                    "designation": contentNeo["designation"],
+                    "name": contentNeo["name"],
+                    "diameter_km": contentNeo["diameter_km"],
+                    "potentially_hazardous": contentNeo["potentially_hazardous"],
                 },
             }
         )
 
     with open(filename, "w") as outfile:
-        json.dump(data, outfile, indent="\t")
+        json.dump(data, outfile, indent=2)

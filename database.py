@@ -41,14 +41,21 @@ class NEODatabase:
         self._approaches = approaches
 
         self._designation_to_index = {neo.designation: index for index, neo in enumerate(self._neos)}
-
+        
         for approach in self._approaches:
             if approach.designation in self._designation_to_index.keys():
                 approach.neo = self._neos[self._designation_to_index[approach.designation]]
                 self._neos[self._designation_to_index[approach.designation]].approaches.append(approach)
                 
-        self._designation_to_neo = {neo.designation: neo for neo in self._neos}
-        self.name_to_neo = {neo.name: neo for neo in self._neos}
+        self._neo_by_designation = dict()
+        self._neo_by_name = dict()
+    
+        for neo in self._neos:
+            designation = neo.designation
+            name = neo.name
+            self._neo_by_designation[designation] = neo
+            self._neo_by_name[name] = neo 
+	
 
     def get_neo_by_designation(self, designation):
         """Find and return an NEO by its primary designation.
@@ -60,7 +67,9 @@ class NEODatabase:
         :param designation: The primary designation of the NEO to search for.
         :return: The `NearEarthObject` with the desired primary designation, or `None`.
         """
-        return self._designation_to_neo.get(designation.upper(), None)
+        if self._neo_by_designation.get(designation) :
+            return self._neo_by_designation.get(designation)
+        return None
 
     def get_neo_by_name(self, name):
         """Find and return an NEO by its name.
@@ -73,7 +82,9 @@ class NEODatabase:
         :param name: The name, as a string, of the NEO to search for.
         :return: The `NearEarthObject` with the desired name, or `None`.
         """
-        return self.name_to_neo.get(name.capitalize(), None)
+        if self._neo_by_name.get(name) :
+            return self._neo_by_name.get(name)
+        return None
 
     def query(self, filters=()):
         """Query close approaches to generate those that match a collection of filters.
@@ -86,9 +97,11 @@ class NEODatabase:
         :param filters: A collection of filters capturing user-specified criteria.
         :return: A stream of matching `CloseApproach` objects.
         """
+        filtered_approaches = []
         if filters:
-            for approach in self._approaches:
-                if all(map(lambda f: f(approach), filters)):
+             for approach in self._approaches:
+                resultant_approaches = map(lambda f: f(approach), filters)
+                if all(resultant_approaches):
                     yield approach
         else:
             # return all the close approaches if they are no filters
